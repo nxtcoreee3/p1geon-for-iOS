@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>p1geon</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="p1geon">
+<link rel="apple-touch-icon" href="icon.png">
+
+<style>
+:root {
+  --bg: #05070d;
+  --blue: #3da9ff;
+  --blue-dark: #1e5eff;
+  --dim: #8b93a7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: radial-gradient(circle at top, #0b1a3a, var(--bg));
+  font-family: -apple-system, BlinkMacSystemFont;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 390px;
+  padding: 28px 20px 40px;
+  text-align: center;
+}
+
+.title {
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--dim);
+}
+
+.ring {
+  margin: 42px auto 26px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: conic-gradient(var(--blue) 0deg, rgba(255,255,255,0.08) 0deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inner {
+  width: 170px;
+  height: 170px;
+  border-radius: 50%;
+  background: #060914;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42px;
+  font-weight: 600;
+}
+
+.status {
+  font-size: 14px;
+  color: var(--dim);
+  min-height: 20px;
+}
+
+button {
+  margin-top: 30px;
+  width: 100%;
+  height: 56px;
+  border-radius: 16px;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+}
+
+button:disabled {
+  opacity: 0.45;
+}
+
+.watermark {
+  margin-top: 26px;
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+  letter-spacing: 0.4px;
+  user-select: none;
+}
+
+/* Respring screen */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: none;
+  z-index: 999;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app" id="app">
+  <div class="title">p1geon</div>
+  <div class="subtitle" id="subtitle">Detecting iOS…</div>
+
+  <div class="ring" id="ring">
+    <div class="inner" id="percent">0%</div>
+  </div>
+
+  <div class="status" id="status">Ready</div>
+
+  <button id="btn">Jailbreak</button>
+
+  <div class="watermark">made by nxtcoreee3</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<script>
+const btn = document.getElementById("btn");
+const percent = document.getElementById("percent");
+const ring = document.getElementById("ring");
+const status = document.getElementById("status");
+const overlay = document.getElementById("overlay");
+const subtitle = document.getElementById("subtitle");
+
+function getiOS() {
+  const m = navigator.userAgent.match(/OS (\d+[_\d]*) like Mac OS X/);
+  return m ? m[1].replace(/_/g, ".") : null;
+}
+
+const ios = getiOS();
+subtitle.textContent = ios ? `iOS ${ios} detected` : "iOS detected";
+
+const phases = [
+  "Initializing exploit environment",
+  "Querying MobileGestalt",
+  "Leaking kernel task port",
+  "Bypassing PAC protections",
+  "Rebuilding trust cache",
+  "Patching AMFI and sandbox",
+  "Injecting userspace hooks",
+  "Finalizing jailbreak"
+];
+
+btn.onclick = () => {
+  btn.disabled = true;
+  let p = 0;
+  let phase = 0;
+  let breakPoint = Math.floor(Math.random() * (98 - 84 + 1)) + 84;
+
+  status.textContent = phases[0];
+
+  const timer = setInterval(() => {
+    p++;
+    percent.textContent = p + "%";
+    ring.style.background =
+      `conic-gradient(#3da9ff ${p * 3.6}deg, rgba(255,255,255,0.08) 0deg)`;
+
+    if (p % 12 === 0 && phase < phases.length) {
+      status.textContent = phases[phase++];
+    }
+
+    if (p === breakPoint) {
+      clearInterval(timer);
+      fakeRespring(p);
+    }
+
+    if (p >= 100) {
+      clearInterval(timer);
+      finish();
+    }
+  }, 45);
+};
+
+function fakeRespring(currentProgress) {
+  status.textContent = "Userspace respring";
+  overlay.style.display = "block";
+
+  setTimeout(() => {
+    overlay.style.display = "none";
+    resumeAfterRespring(currentProgress);
+  }, 1800);
+}
+
+function resumeAfterRespring(p) {
+  status.textContent = "Reinitializing services";
+
+  const resume = setInterval(() => {
+    p++;
+    percent.textContent = p + "%";
+    ring.style.background =
+      `conic-gradient(#3da9ff ${p * 3.6}deg, rgba(255,255,255,0.08) 0deg)`;
+
+    status.textContent = "Finalizing jailbreak environment";
+
+    if (p >= 100) {
+      clearInterval(resume);
+      finish();
+    }
+  }, 40);
+}
+
+function finish() {
+  percent.textContent = "✓";
+  ring.style.background =
+    `conic-gradient(#3da9ff 360deg, rgba(255,255,255,0.08) 0deg)`;
+  status.textContent = "Jailbreak completed";
+  btn.textContent = "Completed";
+}
+</script>
+
+</body>
+</html>
